@@ -1,8 +1,21 @@
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import GlobalLayout from './components/global-layout';
+import { ReactNode } from 'react';
+import { NextPage } from 'next';
 
-export default function App({ Component, pageProps }: AppProps) {
+// 기존 Next.js에서 제공하는 NextPage 타입에 getLayout 메소드 타입 추가
+type NextPageWithLayout = NextPage & {
+    getLayout?: (page: ReactNode) => ReactNode;
+};
+
+// AppProps 타입 확장
+export default function App({
+    Component,
+    pageProps,
+}: AppProps & {
+    Component: NextPageWithLayout;
+}) {
     // const router = useRouter();
 
     // const moveToTestPage = () => {
@@ -14,9 +27,8 @@ export default function App({ Component, pageProps }: AppProps) {
     //     router.prefetch('/test');
     // }, []);
 
-    return (
-        <GlobalLayout>
-            <Component {...pageProps} />
-        </GlobalLayout>
-    );
+    //console.log(Component.getLayout);
+    const getLayout = Component.getLayout ?? ((page: ReactNode) => page);
+
+    return <GlobalLayout>{getLayout(<Component {...pageProps} />)}</GlobalLayout>;
 }
