@@ -1,4 +1,3 @@
-import books from '@/mock/books.json';
 import BookItem from '@/components/book-item';
 import { BookData } from '@/types';
 
@@ -10,8 +9,12 @@ export default async function Page({
         q?: string;
     }>;
 }) {
+    // 동적 함수(쿼리스트링)로 페이지 캐시 불가능 -> 데이터 캐시를 최대한 활용 -> 검색 결과 캐시
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/search?q=${(await searchParams).q}`
+        `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/search?q=${(await searchParams).q}`,
+        {
+            cache: 'force-cache',
+        }
     );
     if (!response.ok) {
         return <div>오류가 발생했습니다...</div>;
