@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation';
 import style from './page.module.css';
+import { ReviewData } from '@/types';
+import ReviewItem from '@/components/review-item';
+import { ReviewEditor } from '@/components/review-editor';
 
 // 라우트 세그먼트 옵션
 export const dynamicParams = true;
@@ -12,11 +15,8 @@ export function generateStaticParams() {
     return [{ id: '1' }, { id: '2' }, { id: '3' }];
 }
 
-// params: 페이지 컴포넌트에 자동으로 제공되는 현재 페이지의 URL 파라미터 값
-export default async function Page({ params }: { params: Promise<{ id: string | string[] }> }) {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${(await params).id}`
-    );
+async function BookDetail({ bookId }: { bookId: string }) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${bookId}`);
     if (!response.ok) {
         if (response.status === 404) {
             notFound();
@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: Promise<{ id: string | 
     const { title, subTitle, description, author, publisher, coverImgUrl } = book;
 
     return (
-        <div className={style.container}>
+        <section>
             <div
                 className={style.cover_img_container}
                 style={{ backgroundImage: `url('${coverImgUrl}')` }}>
@@ -40,6 +40,34 @@ export default async function Page({ params }: { params: Promise<{ id: string | 
                 {author} | {publisher}
             </div>
             <div className={style.description}>{description}</div>
+        </section>
+    );
+}
+
+async function ReviewList({ bookId }: { bookId: string }) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/review/book/${bookId}`);
+
+    if (!response.ok) {
+        throw new Error(`Review fetch failed: ${response.statusText}`);
+    }
+
+    const reviews: ReviewData[] = await response.json();
+    return (
+        <section>
+            {reviews.map((review) => (
+                <ReviewItem key={`review-item-${review.id}`} {...review} />
+            ))}
+        </section>
+    );
+}
+
+// params: 페이지 컴포넌트에 자동으로 제공되는 현재 페이지의 URL 파라미터 값
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    return (
+        <div className={style.container}>
+            <BookDetail bookId={(await params).id} />
+            <ReviewEditor bookId={(await params).id} />
+            <ReviewList bookId={(await params).id} />
         </div>
     );
 }
