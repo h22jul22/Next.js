@@ -13,7 +13,7 @@ export const dynamicParams = true;
 
 // 정적인 파라미터를 생성하는 함수 (페이지 라우터의 getStaticPaths)
 // 빌드타임에 정적 파라미터에 해당하는 페이지를 만들어 놓는다 -> 풀 라우트 캐시 적용
-export function generateStaticParams() {
+export async function generateStaticParams() {
     return [{ id: '1' }, { id: '2' }, { id: '3' }];
 }
 
