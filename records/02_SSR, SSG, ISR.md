@@ -7,20 +7,21 @@
 페이지에서 서버 사이드 렌더링을 사용하려면, `getServerSideProps`라는 비동기 함수를 export해야 하고, 이 함수는 매 요청마다 서버에서 호출된다.
 
 ```jsx
-// This gets called on every request
 export async function getServerSideProps() {
-    // Fetch data from external API
+    // 외부 API에서 데이터를 가져오기
     const res = await fetch(`https://.../data`);
     const data = await res.json();
 
-    // Pass data to the page via props
+    // `props`로 반환하여 Page 컴포넌트에서 사용 가능
     return { props: { data } };
 }
 
 export default function Page({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    // Render data...
+    // 데이터 렌더링...
 }
 ```
+
+`getServerSideProps`는 `getStaticProps`와 유사하지만, 차이점은 `getServerSideProps`가 빌드 시점이 아니라 매 요청마다 실행된다는 것이다.
 
 <br>
 
@@ -91,7 +92,11 @@ export async function getStaticProps(context: GetStaticPropsContext) {
   const post = await res.json();
 
   // `post` 데이터를 `props`로 전달
-  return { props: { post } };
+  return {
+    props: {
+        post
+    },
+  };
 }
 
 export default function Post({ post }) {
