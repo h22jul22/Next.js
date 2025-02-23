@@ -6,14 +6,14 @@ Next.js Page Router에서는 `<Head>` 컴포넌트를 사용하여 HTML 문서�
 > ✅ SEO 및 Open Graph 메타 태그 수정 가능
 > ✅ Next.js에서 올바르게 메타데이터가 업데이트되도록 설정 가능
 
-## Next.js의 `<Head>` 컴포넌트
+### Next.js의 `<Head>` 컴포넌트
 
 `next/head`에서 제공하는 `<Head>` 컴포넌트를 import해서 사용하면 된다.
 
 -   일반적인 `<head>` 태그 대신 `<Head>`**(대문자) 컴포넌트**를 사용한다.
 -   `<Head>`를 사용하면 Next.js 페이지 내에서 **메타데이터를 동적으로 업데이트**할 수 있다.
 
-### 📝 1. 메인 페이지의 제목(`<title>`)과 Open Graph 메타 태그를 설정해보자.
+**📝 1. 메인 페이지의 제목(`<title>`)과 Open Graph 메타 태그를 설정해보자.**
 
 ```jsx
 // pages/index.tsx
@@ -37,7 +37,7 @@ export default function Home({
 }
 ```
 
-### 📝 2. 이번엔 동적 페이지의 제목(`<title>`)과 Open Graph 메타 태그를 설정해보자.
+**📝 2. 이번엔 동적 페이지의 제목(`<title>`)과 Open Graph 메타 태그를 설정해보자.**
 
 ```jsx
 // pages/book/[id].tsx
