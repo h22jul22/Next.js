@@ -116,9 +116,9 @@ export default function Post({ post }) {
 
 ISR(Incremental Static Regeneration)은 정적 생성된 페이지를 전체 사이트를 다시 빌드하지 않고도 업데이트할 수 있도록 해준다.
 
-> ✅ 전체 사이트를 다시 빌드하지 않고도 정적 콘텐츠 업데이트 가능
-> ✅ 미리 렌더링된 정적 페이지를 제공하여 서버 부하 감소
-> ✅ 적절한 캐시 제어(Cache-Control) 헤더 자동 설정
+> ✅ 전체 사이트를 다시 빌드하지 않고도 정적 콘텐츠 업데이트 가능  
+> ✅ 미리 렌더링된 정적 페이지를 제공하여 서버 부하 감소  
+> ✅ 적절한 캐시 제어(Cache-Control) 헤더 자동 설정  
 > ✅ 대량의 콘텐츠 페이지를 효과적으로 처리하여 `next build` 시간이 길어지는 문제 해결
 
 위의 SSG 예시에서 60초마다 캐시를 무효화하고 새로운 데이터를 가져오려면, `getStaticProps` 함수의 리턴 값으로 `props` 바깥에 `revalidate` 이라는 프로퍼티를 추가해주면 된다.
@@ -144,9 +144,9 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 
 Next.js에서는 즉시 페이지를 다시 생성(revalidate)할 수 있도록 API 라우트를 활용한 **온디맨드(요청시, 주문시) 검증** 기능을 제공한다. 이를 사용하면 특정 페이지를 **필요할 때만** 다시 생성할 수 있다.
 
-> ✅ getStaticProps에서 revalidate 시간을 지정할 필요 없음
-> ✅ API 요청을 통해 특정 페이지를 수동으로 갱신 가능
-> ✅ 불필요한 재생성을 방지하여 성능 최적화
+> ✅ getStaticProps에서 revalidate 시간을 지정할 필요 없음  
+> ✅ API 요청을 통해 특정 페이지를 수동으로 갱신 가능  
+> ✅ 불필요한 재생성을 방지하여 성능 최적화  
 > ✅ 보안 토큰을 활용해 승인된 요청만 허용
 
 **1. API 라우트에서 `res.revalidate()` 사용하기**
