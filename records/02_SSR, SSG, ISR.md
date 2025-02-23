@@ -104,12 +104,103 @@ export default function Post({ post }) {
 }
 ```
 
-<br>
-
 ### 데이터 없이 정적 생성
 
 기본적으로 Next.js는 별도의 데이터 요청 없이 정적 생성을 사용해 페이지를 사전 렌더링한다.
 
 즉, 외부 데이터를 가져올 필요가 없어 `getServerSideProps`, `getStaticProps`를 사용하지 않아도, 기본적으로 SSG 방식이 적용되어 빌드 시점에 단일 HTML 파일로 생성된다.
+
+<br>
+
+## Incremental Static Regeneration (ISR)
+
+ISR(Incremental Static Regeneration)은 정적 생성된 페이지를 전체 사이트를 다시 빌드하지 않고도 업데이트할 수 있도록 해준다.
+
+> ✅ 전체 사이트를 다시 빌드하지 않고도 정적 콘텐츠 업데이트 가능
+> ✅ 미리 렌더링된 정적 페이지를 제공하여 서버 부하 감소
+> ✅ 적절한 캐시 제어(Cache-Control) 헤더 자동 설정
+> ✅ 대량의 콘텐츠 페이지를 효과적으로 처리하여 `next build` 시간이 길어지는 문제 해결
+
+위의 SSG 예시에서 60초마다 캐시를 무효화하고 새로운 데이터를 가져오려면, `getStaticProps` 함수의 리턴 값으로 `props` 바깥에 `revalidate` 이라는 프로퍼티를 추가해주면 된다.
+
+```jsx
+export async function getStaticProps(context: GetStaticPropsContext) {
+  const res = await fetch(`https://.../posts/${context.params!.id}`);
+  const post = await res.json();
+
+  // `post` 데이터를 `props`로 전달
+  return {
+    props: {
+        post
+    },
+	// 60초마다 캐시를 무효화하고 새로운 데이터를 가져옴
+    revalidate: 60,
+  };
+}
+
+```
+
+### On-Demand Revalidation (res.revalidate())
+
+Next.js에서는 즉시 페이지를 다시 생성(revalidate)할 수 있도록 API 라우트를 활용한 **온디맨드(요청시, 주문시) 검증** 기능을 제공한다. 이를 사용하면 특정 페이지를 **필요할 때만** 다시 생성할 수 있다.
+
+> ✅ getStaticProps에서 revalidate 시간을 지정할 필요 없음
+> ✅ API 요청을 통해 특정 페이지를 수동으로 갱신 가능
+> ✅ 불필요한 재생성을 방지하여 성능 최적화
+> ✅ 보안 토큰을 활용해 승인된 요청만 허용
+
+**1. API 라우트에서 `res.revalidate()` 사용하기**
+
+```jsx
+// pages/api/revalidate.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    // 요청이 올바른지 확인하기 위해 secret token 검증
+    if (req.query.secret !== process.env.MY_SECRET_TOKEN) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    try {
+        // 다시 생성할 경로 지정 ("/posts/[id]" → 실제 경로 "/posts/1")
+        await res.revalidate('/posts/1');
+        return res.json({ revalidated: true });
+    } catch (err) {
+        // 오류 발생 시, Next.js는 마지막으로 성공한 페이지를 계속 제공
+        return res.status(500).send('Error revalidating');
+    }
+}
+```
+
+**2. API 호출로 페이지 재검증 실행**
+
+```jsx
+fetch('/api/revalidate?secret=your-secret-token')
+    .then((res) => res.json())
+    .then((data) => console.log(data));
+```
+
+**3. `getStaticProps`에서 `revalidate` 생략 가능**
+
+온디맨드 방식에서는 `getStaticProps`에서 `revalidate` 시간을 설정할 필요가 없다. Next.js는 기본값인 false(자동 재생성 없음)을 사용하며, `res.revalidate()`가 호출될 때만 페이지를 다시 생성한다.
+
+```jsx
+export async function getStaticProps() {
+    const res = await fetch('https://.../posts/1');
+    const post = await res.json();
+
+    return {
+        props: { post },
+        // `revalidate` 지정 필요 없음 (res.revalidate()로 처리)
+    };
+}
+```
+
+**🔎 `res.revalidate()`가 유용한 경우**
+
+-   관리자가 블로그 게시글을 업데이트할 때만 새로 고치고 싶을 때
+-   제품 상세 페이지를 새로 등록/수정할 때만 변경 사항을 반영하고 싶을 때
+-   댓글, 리뷰 등 특정 데이터가 업데이트될 때만 정적 페이지를 새로 만들고 싶을 때
+-   CDN 캐시를 불필요하게 무효화하지 않도록 최적화하고 싶을 때
 
 <br>
