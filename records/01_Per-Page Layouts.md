@@ -157,6 +157,8 @@ Next.js App Router에서는 특정 폴더를 **"경로 그룹(Route Group)"** �
 -   공통 경로 안에서 일부 경로에만 특정 레이아웃 적용 가능
 -   특정 경로에만 로딩 스켈레톤(loading.tsx) 추가 가능
 
+<br>
+
 레이아웃을 설정해보며 Page Router와 App Router를 비교해보니, Page Router에서는 번거롭게 설정해야했던 부분을 App Router에서 확실히 편리하고 직관적으로 설정할 수 있게 변경된게 느껴졌다.
 
 그래도 리액트만 써왔던 나에게는 Next.js의 파일 기반 라우팅 시스템은 Page Router와 App Router 모두 무척이나 편리하게 느껴진다.
