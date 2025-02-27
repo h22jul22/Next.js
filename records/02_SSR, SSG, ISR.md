@@ -232,18 +232,27 @@ export default async function Page() {
 }
 ```
 
+### ✔️ 데이터 캐시
+
+App Router에서는 오직 `fetch()` 메서드에서만 활용 가능한 다양한 데이터 캐시 옵션들을 지원한다.
+
+```js
+const response = await fetch('~/api', { cache: 'no-store' }); // 기본값
+const response = await fetch('~/api', { cache: 'force-cache' });
+const response = await fetch('~/api', { next: { revalidate: 10 } });
+const response = await fetch('~/api', { next: { tags: ['a'] } });
+```
+
 <br>
 
-## ✅ Server-side Rendering (SSR) 대체 - 동적 데이터 페칭 (cache: "no-store")
+## ✅ Server-side Rendering (SSR) 대체 - 동적 데이터 페칭 (fetch() 기본값)
 
-기존 `getServerSideProps`는 매 요청마다 새로운 데이터를 불러오도록 동작했다.
-App Router에서는 `fetch()`의 옵션을 `cache: "no-store"`로 설정하면 SSR과 동일한 동작을 구현할 수 있다.
+Next.js 15에서는 `fetch()`의 기본 동작이 매 요청마다 새로운 데이터를 가져오는 `cache: "no-store"`로 변경되었다.
+즉, 기존 Page Router에서 `getServerSideProps`를 사용하던 방식과 동일하게 동작하며, 명시적으로 설정하지 않아도 자동으로 새로운 데이터를 요청한다.
 
 ```tsx
 async function getData() {
-    const res = await fetch('https://api.example.com/data', {
-        cache: 'no-store',
-    });
+    const res = await fetch('https://api.example.com/data'); // 기본값: cache: "no-store"
     return res.json();
 }
 
@@ -255,16 +264,21 @@ export default async function Page() {
 
 -   매 요청마다 새로운 데이터를 가져옴 (SSR과 동일)
 -   실시간으로 업데이트되는 데이터가 필요할 때 사용
+-   Next.js 15에서는 별도로 `cache: "no-store"`를 지정하지 않아도 됨
 
 <br>
 
-## ✅ Static Site Generation (SSG) 대체 - 기본적으로 fetch()는 정적 캐싱
+## ✅ Static Site Generation (SSG) 대체 - 명시적으로 cache: "force-cache" 설정 필요
 
-기본적으로 `fetch()`는 정적 캐싱이 적용된다. 즉, `cache: "force-cache"`(기본값)로 설정된 상태에서 사용하면 SSG와 동일한 방식으로 동작한다.
+Next.js 15에서는 `fetch()`의 기본값이 `no-store`로 변경되었기 때문에,
+정적 사이트처럼 미리 데이터를 가져와 저장하려면 `cache: "force-cache"`를 명시적으로 설정해야 한다.
+이렇게 하면 기존 `getStaticProps`와 같은 정적 데이터 페칭 방식이 적용된다.
 
 ```tsx
 async function getData() {
-    const res = await fetch('https://api.example.com/data'); // 기본값: cache: "force-cache"
+    const res = await fetch('https://api.example.com/data', {
+        cache: 'force-cache',
+    });
     return res.json();
 }
 
@@ -276,6 +290,7 @@ export default async function Page() {
 
 -   정적 사이트처럼 미리 데이터를 가져와 저장됨
 -   새로고침해도 같은 데이터를 사용함 (캐시된 응답)
+-   Next.js 15에서는 `cache: "force-cache"`를 명시적으로 설정해야 함
 
 <br>
 
@@ -300,6 +315,7 @@ export default async function Page() {
 
 -   페이지가 처음 요청될 때 **정적으로 생성**됨
 -   10초가 지난 후 새로운 요청이 들어오면 데이터를 새로 불러와 업데이트됨
+-   `revalidate: 0`을 설정하면 `no-store`와 동일한 효과를 가짐 (항상 새로운 데이터를 가져옴)
 
 <br>
 
@@ -337,8 +353,8 @@ export default function ClientComponent() {
 
 | 기능                       | Page Router 방식                | App Router 방식                        |
 | -------------------------- | ------------------------------- | -------------------------------------- |
-| **SSR**                    | `getServerSideProps`            | `fetch()` + `cache: "no-store"`        |
-| **SSG**                    | `getStaticProps`                | 기본적으로 `fetch()`가 정적 캐싱됨     |
+| **SSR**                    | `getServerSideProps`            | `fetch()` (기본값 `"no-store"`)        |
+| **SSG**                    | `getStaticProps`                | `fetch()` + cache: "force-cache"       |
 | **ISR**                    | `getStaticProps` + `revalidate` | `fetch()` + `next: { revalidate: 초 }` |
 | **클라이언트 데이터 페칭** | `useEffect` + API 요청          | `useEffect` + API 요청 (변화 없음)     |
 
