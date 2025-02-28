@@ -149,6 +149,8 @@ Next.js의 Client-side Router Cache는 경로 세그먼트(Route Segment)의 RSC
 | **적용 대상**        | **React 렌더링 단계 내에서 동일한 요청**                                             | API 요청(fetch) 응답 데이터                                                            | **정적으로 렌더링된 페이지**                                            | **네비게이션 중 이전 및 예상되는 경로**                        |
 | **주요 특징**        | - 하나의 페이지를 렌더링하는 동안 같은 `fetch()` 요청을 중복 실행하지 않음           | - `fetch()` 호출을 캐싱하여 데이터 요청 최적화 <br> - `cache: 'force-cache'` 설정 필요 | - **정적 페이지를 서버에서 캐싱**하여 성능 최적화 <br> - 배포 시 삭제됨 | - 네비게이션 성능 개선 <br> - 브라우저 상태 및 React 상태 유지 |
 
+<br>
+
 -   Request Memoization → 하나의 렌더링 패스 동안 동일한 요청을 자동으로 메모이제이션 (렌더링 완료 후 삭제됨)
 -   Data Cache → API 요청(fetch) 응답 데이터를 캐싱하여 서버 부하 감소
 -   Full Route Cache → 서버에서 정적 페이지를 캐싱하여 빠른 응답 제공
