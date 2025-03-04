@@ -99,3 +99,196 @@ Server Actions는 강력한 기능이지만, 모든 경우에 필요한 것은 �
 
 <br>
 <hr>
+
+## ✅ 컨벤션
+
+Server Action은 React의 `"use server"` 지시어를 사용하여 정의할 수 있다. `async` 함수의 상단에 이 지시어를 추가하여 해당 함수를 Server Action으로 표시하거나, 파일 상단에 지시어를 추가하여 해당 파일의 모든 내보내기를 Server Action으로 지정할 수 있다.
+
+### ✔️ 서버 컴포넌트에서의 사용
+
+서버 컴포넌트에서는 인라인 함수 레벨 또는 모듈 레벨에서 `"use server"` 지시어를 사용할 수 있다. 인라인으로 Server Action을 추가하려면, 함수 본문 상단에 `"use server"`를 추가하면 된다.
+
+```tsx
+// app/page.tsx
+export default function Page() {
+    // Server Action
+    async function create() {
+        'use server';
+        // 데이터 변조 로직
+    }
+
+    return '...';
+}
+```
+
+### ✔️ 클라이언트 컴포넌트에서의 사용
+
+클라이언트 컴포넌트에서 Server Action을 호출하려면, **새로운 파일을 생성**하고 파일 상단에 `"use server"` 지시어를 추가한다. 이 파일 내의 모든 함수는 서버 및 클라이언트 컴포넌트에서 재사용할 수 있는 Server Actions로 표시된다.
+
+```tsx
+// app/actions.ts
+
+'use server';
+
+export async function create() {
+    // 데이터 변조 로직
+}
+```
+
+```tsx
+// app/ui/button.tsx
+
+'use client';
+
+import { create } from '@/app/actions';
+
+export function Button() {
+    return <button onClick={create}>Create</button>;
+}
+```
+
+### ✔️ Props로 액션 전달하기
+
+Server Action을 클라이언트 컴포넌트에 prop으로 전달할 수 있다.
+
+```tsx
+<ClientComponent updateItemAction={updateItem} />
+```
+
+```tsx
+// app/client-component.tsx
+
+'use client';
+
+export default function ClientComponent({
+    updateItemAction,
+}: {
+    updateItemAction: (formData: FormData) => void;
+}) {
+    return <form action={updateItemAction}>{/* ... */}</form>;
+}
+```
+
+<br>
+<hr>
+
+## ✅ 예시
+
+### ✔️ Forms
+
+서버 액션을 사용하여 폼 데이터를 처리하는 예시이다.
+
+```tsx
+// app/invoices/page.tsx
+
+export default function Page() {
+    async function createInvoice(formData: FormData) {
+        'use server';
+
+        const rawFormData = {
+            customerId: formData.get('customerId'),
+            amount: formData.get('amount'),
+            status: formData.get('status'),
+        };
+
+        // 데이터 변조 로직
+        // 캐시 재검증 로직
+    }
+
+    return (
+        <form action={createInvoice}>
+            <input name='customerId' type='text' placeholder='Customer ID' />
+            <input name='amount' type='number' placeholder='Amount' />
+            <input name='status' type='text' placeholder='Status' />
+            <button type='submit'>Create Invoice</button>
+        </form>
+    );
+}
+```
+
+### ✔️ Programmatic form submission
+
+`requestSubmit()` 메서드를 사용하여 Programmatic하게 폼 제출을 트리거하는 예시이다.
+
+```tsx
+// app/entry.tsx
+
+'use client';
+
+import { useRef } from 'react';
+
+export default function EntryForm() {
+    const formRef = useRef<HTMLFormElement>(null);
+
+    async function saveEntry(formData: FormData) {
+        'use server';
+        // 데이터 저장 로직
+    }
+
+    function handleKeyDown(event: React.KeyboardEvent) {
+        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+            formRef.current?.requestSubmit();
+        }
+    }
+
+    return (
+        <form ref={formRef} action={saveEntry} onKeyDown={handleKeyDown}>
+            <textarea name='content' placeholder='Write your entry...' />
+            <button type='submit'>Save Entry</button>
+        </form>
+    );
+}
+```
+
+### ✔️ Pending states
+
+리액트 18버전에서 추가 된 `useFormStatus` 훅을 사용하여 폼의 로딩 상태를 표시하는 예시이다.
+
+```tsx
+// components/SubmitButton.tsx
+
+'use client';
+
+import { experimental_useFormStatus as useFormStatus } from 'react-dom';
+
+export default function SubmitButton() {
+    const { pending } = useFormStatus();
+
+    return (
+        <button type='submit' disabled={pending}>
+            {pending ? 'Submitting...' : 'Submit'}
+        </button>
+    );
+}
+```
+
+```tsx
+// app/form/page.tsx
+
+import SubmitButton from '@/components/SubmitButton';
+
+export default function FormPage() {
+    async function handleSubmit(formData: FormData) {
+        'use server';
+        // 폼 데이터 처리 로직
+    }
+
+    return (
+        <form action={handleSubmit}>
+            <input name='username' type='text' placeholder='Username' />
+            <SubmitButton />
+        </form>
+    );
+}
+```
+
+<br>
+<hr>
+
+## ✅ 결론
+
+Server Actions는 기존의 클라이언트 API 호출 방식이 가지는 복잡성과 보안 문제를 해결할 수 있는 강력한 기능이다.
+
+이를 사용하면 **네트워크 요청을 최소화**하고, **상태 관리를 단순화**하며, **보안을 강화**할 수 있다. 또한, 폼 제출 및 데이터 변조와 같은 기능을 간편하게 구현할 수 있어 Next.js 기반 애플리케이션의 개발 생산성을 크게 향상시킨다.
+
+React에서 API 호출을 직접 수행하던 방식과 비교했을 때, Server Actions는 더욱 효율적이고 보안성이 높은 대안이 될 수 있다. 이를 적절히 활용하면 서버와 클라이언트 간 데이터 흐름을 단순화하면서도 성능과 유지보수성을 개선할 수 있다.
