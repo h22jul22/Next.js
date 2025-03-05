@@ -37,8 +37,6 @@ export default function Home({
 }
 ```
 
-![](https://velog.velcdn.com/images/h22ju/post/e6753626-af19-47b0-9c17-2ab38417b24f/image.png)
-
 **📝 2. 이번엔 동적 페이지의 제목(`<title>`)과 Open Graph 메타 태그를 설정해보자**
 
 ```jsx
@@ -59,8 +57,6 @@ export default function Page({ book }: InferGetStaticPropsType<typeof getStaticP
     );
 }
 ```
-
-![](https://velog.velcdn.com/images/h22ju/post/28ba2379-ac11-4747-a1c7-ce96a08ff903/image.png)
 
 <br>
 <hr>
